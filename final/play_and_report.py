@@ -1,15 +1,4 @@
-"""Helper to run a local headless match and print MyPlayer stats after the game.
-
-Usage:
-  python play_and_report.py
-
-This will run a single match between two players (you can change players below)
-and print statistics (nodes/time) for any player that implements `get_stats()`.
-"""
-from board_hex import BoardHex
-from game_state_hex import GameStateHex
-from player_hex import PlayerHex
-from seahorse.game.light_action import LightAction
+"""Run local headless matches and report optional player search statistics."""
 
 import importlib
 import os
@@ -18,6 +7,15 @@ import csv
 import statistics
 import sys
 import time
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_ROOT not in sys.path:
+        sys.path.insert(0, REPO_ROOT)
+
+from board_hex import BoardHex
+from game_state_hex import GameStateHex
+from player_hex import PlayerHex
+from seahorse.game.light_action import LightAction
 
 
 def _import_module_from_path(path: str):
@@ -254,10 +252,10 @@ if __name__ == "__main__":
     parser.add_argument("--dim", type=int, default=7, help="board dimension (n for n x n)")
     parser.add_argument("--out", type=str, default="results.csv", help="output CSV file")
     parser.add_argument("--opponents", nargs="*", help="opponent module paths (default: random and greedy)")
-    parser.add_argument("my_player", nargs="?", default=os.path.join(os.path.dirname(__file__), "my_player.py"), help="path to your my_player.py")
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    parser.add_argument("my_player", nargs="?", default=os.path.join(repo_root, "my_player.py"), help="path to your my_player.py")
     args = parser.parse_args()
 
-    here = os.path.dirname(__file__)
-    opponents = args.opponents if args.opponents else _default_opponents(here)
+    opponents = args.opponents if args.opponents else _default_opponents(repo_root)
 
     run_experiments(args.my_player, opponents, matches_per_mode=args.matches, depth=args.depth, dim=args.dim, out_csv=args.out)
